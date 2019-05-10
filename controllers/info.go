@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/louisevanderlith/entity/core"
@@ -52,4 +53,29 @@ func (req *InfoController) GetByID() {
 	}
 
 	req.Serve(http.StatusOK, nil, record)
+}
+
+// @Title CreateEntity
+// @Description Creates a comment
+// @Param	body		body 	logic.Entity	true		"Entity entry"
+// @Success 200 {map[string]string} map[string]string
+// @Failure 403 body is empty
+// @router / [post]
+func (req *InfoController) Post() {
+	var entry core.Entity
+	err := json.Unmarshal(req.Ctx.Input.RequestBody, &entry)
+
+	if err != nil {
+		req.Serve(http.StatusBadRequest, err, nil)
+		return
+	}
+
+	rec, err := entry.Create()
+
+	if err != nil {
+		req.Serve(http.StatusNotFound, err, nil)
+		return
+	}
+
+	req.Serve(http.StatusOK, nil, rec)
 }

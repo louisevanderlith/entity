@@ -5,8 +5,8 @@ import "github.com/louisevanderlith/husk"
 type Entity struct {
 	Name       string   `hsk:"size(30)"`
 	ProfileKey husk.Key `hsk:"null"`
-	Addresses  []Address
-	Contact    Contact
+	//Addresses  []Address: Future development
+	Contact Contact
 }
 
 func (e Entity) Valid() (bool, error) {

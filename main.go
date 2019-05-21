@@ -14,7 +14,9 @@ import (
 
 func main() {
 	mode := os.Getenv("RUNMODE")
-	pubPath := os.Getenv("KEYPATH")
+	keyPath := os.Getenv("KEYPATH")
+	pubName := os.Getenv("PUBLICKEY")
+	pubPath := path.Join(keyPath, pubName)
 
 	core.CreateContext()
 	defer core.Shutdown()

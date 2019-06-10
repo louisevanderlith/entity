@@ -3,8 +3,9 @@ package core
 import "github.com/louisevanderlith/husk"
 
 type Entity struct {
-	Name       string   `hsk:"size(30)"`
-	ProfileKey husk.Key `hsk:"null"`
+	Name         string   `hsk:"size(30)"`
+	ProfileKey   husk.Key `hsk:"null"`
+	Registration string   `hsk:"size(30)"` //This can be a Company Registration, RSA ID, Passport or another interal identifier
 	//Addresses  []Address: Future development
 	Contact Contact
 }

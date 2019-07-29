@@ -1,23 +1,15 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/louisevanderlith/droxolite/xontrols"
 	"github.com/louisevanderlith/entity/core"
 	"github.com/louisevanderlith/husk"
-	"github.com/louisevanderlith/mango/control"
 )
 
 type InfoController struct {
-	control.APIController
-}
-
-func NewInfoCtrl(ctrlMap *control.ControllerMap) *InfoController {
-	result := &InfoController{}
-	result.SetInstanceMap(ctrlMap)
-
-	return result
+	xontrols.APICtrl
 }
 
 // @Title GetEntities
@@ -38,7 +30,7 @@ func (req *InfoController) Get() {
 // @Success 200 {core.Entity} core.Entity
 // @router /:key [get]
 func (req *InfoController) GetByID() {
-	key, err := husk.ParseKey(req.Ctx.Input.Param(":key"))
+	key, err := husk.ParseKey(req.FindParam("key"))
 
 	if err != nil {
 		req.Serve(http.StatusBadRequest, err, nil)
@@ -63,7 +55,7 @@ func (req *InfoController) GetByID() {
 // @router / [post]
 func (req *InfoController) Post() {
 	var entry core.Entity
-	err := json.Unmarshal(req.Ctx.Input.RequestBody, &entry)
+	err := req.Body(&entry)
 
 	if err != nil {
 		req.Serve(http.StatusBadRequest, err, nil)

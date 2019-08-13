@@ -5,28 +5,29 @@ package routers
 // @Description API used to access and modify enity details.
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/louisevanderlith/droxolite"
 	"github.com/louisevanderlith/entity/controllers"
-	"github.com/louisevanderlith/mango"
 
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/plugins/cors"
-	"github.com/louisevanderlith/mango/control"
-	secure "github.com/louisevanderlith/secure/core"
-	"github.com/louisevanderlith/secure/core/roletype"
+	"github.com/louisevanderlith/droxolite/roletype"
 )
 
-func Setup(s *mango.Service, host string) {
-	ctrlmap := EnableFilters(s, host)
+func Setup(poxy *droxolite.Epoxy) {
+	//Info
+	infoCtrl := &controllers.InfoController{}
+	infoGroup := droxolite.NewRouteGroup("info", infoCtrl)
+	infoGroup.AddRoute("Create Information", "", "POST", roletype.Owner, infoCtrl.Post)
+	infoGroup.AddRoute("All Information", "/all/{pagesize:[A-Z][0-9]+}", "GET", roletype.User, infoCtrl.Get)
+	infoGroup.AddRoute("View Information", "/{key:[0-9]+\x60[0-9]+}", "GET", roletype.User, infoCtrl.GetByID)
+	poxy.AddGroup(infoGroup)
+	/*ctrlmap := EnableFilters(s, host)
 	infoctrl := controllers.NewInfoCtrl(ctrlmap)
 
 	beego.Router("/v1/info", infoctrl, "post:Post")
 	beego.Router("/v1/info/:key", infoctrl, "get:GetByID")
-	beego.Router("/v1/info/all/:pagesize", infoctrl, "get:Get")
+	beego.Router("/v1/info/all/:pagesize", infoctrl, "get:Get")*/
 }
 
+/*
 func EnableFilters(s *mango.Service, host string) *control.ControllerMap {
 	ctrlmap := control.CreateControlMap(s)
 
@@ -46,3 +47,4 @@ func EnableFilters(s *mango.Service, host string) *control.ControllerMap {
 
 	return ctrlmap
 }
+*/

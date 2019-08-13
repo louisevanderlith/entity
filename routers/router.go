@@ -15,9 +15,9 @@ func Setup(poxy *droxolite.Epoxy) {
 	//Info
 	infoCtrl := &controllers.InfoController{}
 	infoGroup := droxolite.NewRouteGroup("info", infoCtrl)
-	infoGroup.AddRoute("/", "POST", roletype.Owner, infoCtrl.Post)
-	infoGroup.AddRoute("/all/{pagesize:[A-Z][0-9]+}", "GET", roletype.User, infoCtrl.Get)
-	infoGroup.AddRoute("/{key:[0-9]+\x60[0-9]+}", "GET", roletype.User, infoCtrl.GetByID)
+	infoGroup.AddRoute("Create Information", "", "POST", roletype.Owner, infoCtrl.Post)
+	infoGroup.AddRoute("All Information", "/all/{pagesize:[A-Z][0-9]+}", "GET", roletype.User, infoCtrl.Get)
+	infoGroup.AddRoute("View Information", "/{key:[0-9]+\x60[0-9]+}", "GET", roletype.User, infoCtrl.GetByID)
 	poxy.AddGroup(infoGroup)
 	/*ctrlmap := EnableFilters(s, host)
 	infoctrl := controllers.NewInfoCtrl(ctrlmap)

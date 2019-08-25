@@ -5,16 +5,18 @@ package routers
 // @Description API used to access and modify enity details.
 
 import (
-	"github.com/louisevanderlith/droxolite"
 	"github.com/louisevanderlith/entity/controllers"
 
+	"github.com/louisevanderlith/droxolite/mix"
+	"github.com/louisevanderlith/droxolite/resins"
 	"github.com/louisevanderlith/droxolite/roletype"
+	"github.com/louisevanderlith/droxolite/routing"
 )
 
-func Setup(poxy *droxolite.Epoxy) {
+func Setup(poxy resins.Epoxi) {
 	//Info
 	infoCtrl := &controllers.InfoController{}
-	infoGroup := droxolite.NewRouteGroup("info", infoCtrl)
+	infoGroup := routing.NewRouteGroup("info", mix.JSON)
 	infoGroup.AddRoute("Create Information", "", "POST", roletype.Owner, infoCtrl.Post)
 	infoGroup.AddRoute("All Information", "/all/{pagesize:[A-Z][0-9]+}", "GET", roletype.User, infoCtrl.Get)
 	infoGroup.AddRoute("View Information", "/{key:[0-9]+\x60[0-9]+}", "GET", roletype.User, infoCtrl.GetByID)

@@ -3,25 +3,24 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/louisevanderlith/droxolite/xontrols"
+	"github.com/louisevanderlith/droxolite/context"
 	"github.com/louisevanderlith/entity/core"
 	"github.com/louisevanderlith/husk"
 )
 
 type InfoController struct {
-	xontrols.APICtrl
 }
 
 // @Title GetEntities
 // @Description Gets the entities
 // @Success 200 {[]core.Entity} []core.Entity
 // @router /all/:pagesize [get]
-func (req *InfoController) Get() {
-	page, size := req.GetPageData()
+func (req *InfoController) Get(ctx context.Contexer) (int, interface{}) {
+	page, size := ctx.GetPageData()
 
 	results := core.GetEntities(page, size)
 
-	req.Serve(http.StatusOK, nil, results)
+	return http.StatusOK, results
 }
 
 // @Title GetEntity
@@ -29,22 +28,20 @@ func (req *InfoController) Get() {
 // @Param	key			path	husk.Key 	true		"Key of the entity you require"
 // @Success 200 {core.Entity} core.Entity
 // @router /:key [get]
-func (req *InfoController) GetByID() {
-	key, err := husk.ParseKey(req.FindParam("key"))
+func (req *InfoController) GetByID(ctx context.Contexer) (int, interface{}) {
+	key, err := husk.ParseKey(ctx.FindParam("key"))
 
 	if err != nil {
-		req.Serve(http.StatusBadRequest, err, nil)
-		return
+		return http.StatusBadRequest, err
 	}
 
 	record, err := core.GetEntity(key)
 
 	if err != nil {
-		req.Serve(http.StatusNotFound, err, nil)
-		return
+		return http.StatusNotFound, err
 	}
 
-	req.Serve(http.StatusOK, nil, record)
+	return http.StatusOK, record
 }
 
 // @Title CreateEntity
@@ -53,21 +50,19 @@ func (req *InfoController) GetByID() {
 // @Success 200 {map[string]string} map[string]string
 // @Failure 403 body is empty
 // @router / [post]
-func (req *InfoController) Post() {
+func (req *InfoController) Post(ctx context.Contexer) (int, interface{}) {
 	var entry core.Entity
-	err := req.Body(&entry)
+	err := ctx.Body(&entry)
 
 	if err != nil {
-		req.Serve(http.StatusBadRequest, err, nil)
-		return
+		return http.StatusBadRequest, err
 	}
 
 	rec, err := entry.Create()
 
 	if err != nil {
-		req.Serve(http.StatusNotFound, err, nil)
-		return
+		return http.StatusNotFound, err
 	}
 
-	req.Serve(http.StatusOK, nil, rec)
+	return http.StatusOK, rec
 }

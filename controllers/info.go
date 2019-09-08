@@ -8,14 +8,20 @@ import (
 	"github.com/louisevanderlith/husk"
 )
 
-type InfoController struct {
+type Info struct {
+}
+
+func (x *Info) Get(ctx context.Requester) (int, interface{}) {
+	results := core.GetEntities(1, 10)
+
+	return http.StatusOK, results
 }
 
 // @Title GetEntities
 // @Description Gets the entities
 // @Success 200 {[]core.Entity} []core.Entity
 // @router /all/:pagesize [get]
-func (req *InfoController) Get(ctx context.Contexer) (int, interface{}) {
+func (req *Info) Search(ctx context.Requester) (int, interface{}) {
 	page, size := ctx.GetPageData()
 
 	results := core.GetEntities(page, size)
@@ -28,7 +34,7 @@ func (req *InfoController) Get(ctx context.Contexer) (int, interface{}) {
 // @Param	key			path	husk.Key 	true		"Key of the entity you require"
 // @Success 200 {core.Entity} core.Entity
 // @router /:key [get]
-func (req *InfoController) GetByID(ctx context.Contexer) (int, interface{}) {
+func (req *Info) View(ctx context.Requester) (int, interface{}) {
 	key, err := husk.ParseKey(ctx.FindParam("key"))
 
 	if err != nil {
@@ -50,7 +56,7 @@ func (req *InfoController) GetByID(ctx context.Contexer) (int, interface{}) {
 // @Success 200 {map[string]string} map[string]string
 // @Failure 403 body is empty
 // @router / [post]
-func (req *InfoController) Post(ctx context.Contexer) (int, interface{}) {
+func (req *Info) Create(ctx context.Requester) (int, interface{}) {
 	var entry core.Entity
 	err := ctx.Body(&entry)
 

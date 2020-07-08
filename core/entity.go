@@ -10,11 +10,11 @@ type Entity struct {
 	Contact Contact
 }
 
-func (e Entity) Valid() (bool, error) {
+func (e Entity) Valid() error {
 	return husk.ValidateStruct(&e)
 }
 
-func GetEntities(page, pagesize int) husk.Collection {
+func GetEntities(page, pagesize int) (husk.Collection, error) {
 	return ctx.Entities.Find(page, pagesize, husk.Everything())
 }
 

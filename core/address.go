@@ -15,6 +15,6 @@ type Address struct {
 	IsDelivery  bool
 }
 
-func (a Address) Valid() (bool, error) {
+func (a Address) Valid() error {
 	return husk.ValidateStruct(&a)
 }

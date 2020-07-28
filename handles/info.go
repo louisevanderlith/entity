@@ -12,10 +12,10 @@ import (
 
 func GetInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := context.New(w, r)
-	results, err := core.GetEntities(1, 10)
+	results, err := core.Context().GetEntities(1, 10)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Get Entities Error", err)
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
@@ -23,7 +23,7 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 	err = ctx.Serve(http.StatusOK, mix.JSON(results))
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Serve Error", err)
 	}
 }
 
@@ -35,10 +35,10 @@ func SearchInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := context.New(w, r)
 	page, size := ctx.GetPageData()
 
-	results, err := core.GetEntities(page, size)
+	results, err := core.Context().GetEntities(page, size)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Get Entities Error", err)
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
@@ -46,7 +46,7 @@ func SearchInfo(w http.ResponseWriter, r *http.Request) {
 	err = ctx.Serve(http.StatusOK, mix.JSON(results))
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Serve Error", err)
 	}
 }
 
@@ -60,15 +60,15 @@ func ViewInfo(w http.ResponseWriter, r *http.Request) {
 	key, err := husk.ParseKey(ctx.FindParam("key"))
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Parse Key Error", err)
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	record, err := core.GetEntity(key)
+	record, err := core.Context().GetEntity(key)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Get Entity Error", err)
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
@@ -76,7 +76,7 @@ func ViewInfo(w http.ResponseWriter, r *http.Request) {
 	err = ctx.Serve(http.StatusOK, mix.JSON(record.Data()))
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Serve Error", err)
 	}
 }
 
@@ -92,7 +92,7 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 	err := ctx.Body(&entry)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Bind Error", err)
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
@@ -100,7 +100,7 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 	rec, err := entry.Create()
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Create Error", err)
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
@@ -108,6 +108,6 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 	err = ctx.Serve(http.StatusOK, mix.JSON(rec.Data()))
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Serve Error", err)
 	}
 }

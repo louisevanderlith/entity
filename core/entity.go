@@ -1,35 +1,34 @@
 package core
 
-import "github.com/louisevanderlith/husk"
+import (
+	"github.com/louisevanderlith/husk"
+	"github.com/louisevanderlith/kong/prime"
+)
 
 type Entity struct {
-	Name           string   `hsk:"size(30)"`
-	ProfileKey     husk.Key `hsk:"null"`
-	Identification string   `hsk:"size(30)"` //This can be a Company Registration, RSA ID, Passport or another interal identifier
+	Name           string `hsk:"size(30)"`
+	ProfileKey     string
+	User           prime.User
+	Identification string `hsk:"size(30)"` //This can be a Company Registration, RSA ID, Passport or another interal identifier
 	//Addresses  []Address: Future development
-	Contact Contact
 }
 
 func (e Entity) Valid() error {
-	return husk.ValidateStruct(&e)
-}
-
-func GetEntities(page, pagesize int) (husk.Collection, error) {
-	return ctx.Entities.Find(page, pagesize, husk.Everything())
-}
-
-func GetEntity(key husk.Key) (husk.Recorder, error) {
-	return ctx.Entities.FindByKey(key)
+	return husk.ValidateStruct(e)
 }
 
 func (e Entity) Create() (husk.Recorder, error) {
-	rec := ctx.Entities.Create(e)
+	rec, err := ctx.Entities.Create(e)
 
-	if rec.Error != nil {
-		return nil, rec.Error
+	if err != nil {
+		return nil, err
 	}
 
-	ctx.Entities.Save()
+	err = ctx.Entities.Save()
 
-	return rec.Record, nil
+	if err != nil {
+		return nil, err
+	}
+
+	return rec, nil
 }

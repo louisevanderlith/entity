@@ -16,5 +16,5 @@ type Address struct {
 }
 
 func (a Address) Valid() error {
-	return husk.ValidateStruct(&a)
+	return husk.ValidateStruct(a)
 }

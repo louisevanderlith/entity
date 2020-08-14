@@ -1,17 +1,16 @@
 package handles
 
 import (
+	"github.com/louisevanderlith/droxolite/drx"
 	"github.com/louisevanderlith/droxolite/mix"
 	"log"
 	"net/http"
 
-	"github.com/louisevanderlith/droxolite/context"
 	"github.com/louisevanderlith/entity/core"
 	"github.com/louisevanderlith/husk"
 )
 
 func GetInfo(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
 	results, err := core.Context().GetEntities(1, 10)
 
 	if err != nil {
@@ -20,7 +19,7 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ctx.Serve(http.StatusOK, mix.JSON(results))
+	err = mix.Write(w, mix.JSON(results))
 
 	if err != nil {
 		log.Println("Serve Error", err)
@@ -32,8 +31,7 @@ func GetInfo(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {[]core.Entity} []core.Entity
 // @router /all/:pagesize [get]
 func SearchInfo(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
-	page, size := ctx.GetPageData()
+	page, size := drx.GetPageData(r)
 
 	results, err := core.Context().GetEntities(page, size)
 
@@ -43,7 +41,7 @@ func SearchInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ctx.Serve(http.StatusOK, mix.JSON(results))
+	err = mix.Write(w, mix.JSON(results))
 
 	if err != nil {
 		log.Println("Serve Error", err)
@@ -56,8 +54,7 @@ func SearchInfo(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {core.Entity} core.Entity
 // @router /:key [get]
 func ViewInfo(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
-	key, err := husk.ParseKey(ctx.FindParam("key"))
+	key, err := husk.ParseKey(drx.FindParam(r, "key"))
 
 	if err != nil {
 		log.Println("Parse Key Error", err)
@@ -73,7 +70,7 @@ func ViewInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ctx.Serve(http.StatusOK, mix.JSON(record.Data()))
+	err = mix.Write(w, mix.JSON(record.Data()))
 
 	if err != nil {
 		log.Println("Serve Error", err)
@@ -87,9 +84,8 @@ func ViewInfo(w http.ResponseWriter, r *http.Request) {
 // @Failure 403 body is empty
 // @router / [post]
 func CreateInfo(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
 	var entry core.Entity
-	err := ctx.Body(&entry)
+	err := drx.JSONBody(r, &entry)
 
 	if err != nil {
 		log.Println("Bind Error", err)
@@ -105,7 +101,7 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ctx.Serve(http.StatusOK, mix.JSON(rec.Data()))
+	err = mix.Write(w, mix.JSON(rec.Data()))
 
 	if err != nil {
 		log.Println("Serve Error", err)

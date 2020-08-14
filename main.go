@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	securty := flag.String("security", "http://localhost:8086", "Security Provider's URL")
+	securityUrl := flag.String("security", "http://localhost:8086", "Security Provider's URL")
 	srcSecrt := flag.String("scopekey", "secret", "Secret used to validate against scopes")
 
 	flag.Parse()
@@ -22,7 +22,7 @@ func main() {
 		ReadTimeout:  time.Second * 15,
 		WriteTimeout: time.Second * 15,
 		Addr:         ":8097",
-		Handler:      handles.SetupRoutes(*srcSecrt, *securty),
+		Handler:      handles.SetupRoutes(*srcSecrt, *securityUrl),
 	}
 
 	err := srvr.ListenAndServe()

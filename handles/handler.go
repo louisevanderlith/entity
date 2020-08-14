@@ -2,28 +2,38 @@ package handles
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/louisevanderlith/entity/core"
 	"github.com/louisevanderlith/kong"
 	"github.com/rs/cors"
 	"net/http"
 )
 
-func SetupRoutes(scrt, secureUrl string) http.Handler {
+var Manager kong.Manager
+
+func SetupRoutes(scrt, securityUrl string) http.Handler {
+	Manager = kong.NewManager(core.Context())
+
 	r := mux.NewRouter()
 
-	get := kong.ResourceMiddleware("entity.info.search", scrt, secureUrl, GetInfo)
+	r.HandleFunc("/login", kong.ResourceMiddleware(http.DefaultClient, "entity.login.apply", scrt, securityUrl, "", LoginPOST)).Methods(http.MethodPost)
+	r.HandleFunc("/consent", kong.ResourceMiddleware(http.DefaultClient, "entity.consent.apply", scrt, securityUrl, "", ConsentPOST)).Methods(http.MethodPost)
+
+	get := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", GetInfo)
 	r.HandleFunc("/", get).Methods(http.MethodGet)
 
-	view := kong.ResourceMiddleware("entity.info.view", scrt, secureUrl, ViewInfo)
+	view := kong.ResourceMiddleware(http.DefaultClient, "entity.info.view", scrt, securityUrl, "", ViewInfo)
 	r.HandleFunc("/{key:[0-9]+\\x60[0-9]+}", view).Methods(http.MethodGet)
 
-	srch := kong.ResourceMiddleware("entity.info.search", scrt, secureUrl, SearchInfo)
+	srch := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", SearchInfo)
 	r.HandleFunc("/{pagesize:[A-Z][0-9]+}", srch).Methods(http.MethodGet)
 	r.HandleFunc("/{pagesize:[A-Z][0-9]+}/{hash:[a-zA-Z0-9]+={0,2}}", srch).Methods(http.MethodGet)
 
-	create := kong.ResourceMiddleware("blog.articles.create", scrt, secureUrl, CreateInfo)
+	create := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", CreateInfo)
 	r.HandleFunc("/", create).Methods(http.MethodPost)
 
-	lst, err := kong.Whitelist(http.DefaultClient, secureUrl, "entity.info.view", scrt)
+	r.HandleFunc("/register", kong.ResourceMiddleware(http.DefaultClient, "entity.info.register", scrt, securityUrl, "", RegisterPOST)).Methods(http.MethodPost)
+
+	lst, err := kong.Whitelist(http.DefaultClient, securityUrl, "entity.info.view", scrt)
 
 	if err != nil {
 		panic(err)

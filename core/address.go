@@ -3,7 +3,7 @@ package core
 import "github.com/louisevanderlith/husk"
 
 type Address struct {
-	StreeNo     int
+	StreetNo    int
 	Street      string `hsk:"size(80)"`
 	UnitNo      string `hsk:"size(15)"`
 	EstateName  string `hsk:"size(50)"`

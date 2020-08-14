@@ -1,33 +1,43 @@
 package handles
 
 import (
-	"github.com/louisevanderlith/droxolite/context"
 	"github.com/louisevanderlith/droxolite/mix"
-	"github.com/louisevanderlith/secure/core"
+	"github.com/louisevanderlith/entity/core"
+	"github.com/louisevanderlith/husk"
 	"log"
 	"net/http"
 )
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
-
-	result := core.Context.GetUser()
-
-	err := ctx.Serve(http.StatusOK, mix.JSON(result))
+	k := husk.CrazyKey()
+	result, err := core.Context().GetEntity(k)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Get Entity Error", err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	err = mix.Write(w, mix.JSON(result))
+
+	if err != nil {
+		log.Println("Serve Error", err)
 	}
 }
 
 func GetUserByName(w http.ResponseWriter, r *http.Request) {
-	ctx := context.New(w, r)
-
-	result := core.GetUsers(1, 10)
-
-	err := ctx.Serve(http.StatusOK, mix.JSON(result))
+	k := husk.CrazyKey()
+	result, err := core.Context().GetEntity(k)
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Get Entity Error", err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	err = mix.Write(w, mix.JSON(result))
+
+	if err != nil {
+		log.Println("Serve Error", err)
 	}
 }

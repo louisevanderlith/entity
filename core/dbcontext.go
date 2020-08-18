@@ -36,7 +36,7 @@ func CreateContext() {
 }
 
 func seed() {
-	err := ctx.Entities.Seed("db/enities.seed.json")
+	err := ctx.Entities.Seed("db/entities.seed.json")
 
 	if err != nil {
 		panic(err)

@@ -14,7 +14,7 @@ type Entity struct {
 }
 
 func (e Entity) Valid() error {
-	return husk.ValidateStruct(e)
+	return husk.ValidateStruct(&e)
 }
 
 func (e Entity) Create() (husk.Recorder, error) {

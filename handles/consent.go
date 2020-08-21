@@ -18,9 +18,10 @@ func ConsentPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ut, err := Manager.Consent(obj.Token, obj.Claims)
+	ut, err := Manager.Consent(obj.Token, obj.Claims.(map[string]bool))
 
 	if err != nil {
+		log.Println("Consent Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -41,5 +42,9 @@ func ConsentPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(bits)
+	_, err = w.Write(bits)
+
+	if err != nil {
+		log.Println("Serve Error", err)
+	}
 }

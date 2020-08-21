@@ -14,24 +14,24 @@ func SetupRoutes(scrt, securityUrl string) http.Handler {
 	Manager = kong.NewManager(core.Context())
 
 	r := mux.NewRouter()
+	ins := kong.NewResourceInspector(http.DefaultClient, securityUrl, "")
+	r.HandleFunc("/login", ins.Middleware("entity.login.apply", scrt, LoginPOST)).Methods(http.MethodPost)
+	r.HandleFunc("/consent", ins.Middleware("entity.consent.apply", scrt, ConsentPOST)).Methods(http.MethodPost)
 
-	r.HandleFunc("/login", kong.ResourceMiddleware(http.DefaultClient, "entity.login.apply", scrt, securityUrl, "", LoginPOST)).Methods(http.MethodPost)
-	r.HandleFunc("/consent", kong.ResourceMiddleware(http.DefaultClient, "entity.consent.apply", scrt, securityUrl, "", ConsentPOST)).Methods(http.MethodPost)
-
-	get := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", GetInfo)
+	get := ins.Middleware("entity.info.search", scrt, GetInfo)
 	r.HandleFunc("/", get).Methods(http.MethodGet)
 
-	view := kong.ResourceMiddleware(http.DefaultClient, "entity.info.view", scrt, securityUrl, "", ViewInfo)
+	view := ins.Middleware("entity.info.view", scrt, ViewInfo)
 	r.HandleFunc("/{key:[0-9]+\\x60[0-9]+}", view).Methods(http.MethodGet)
 
-	srch := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", SearchInfo)
+	srch := ins.Middleware("entity.info.search", scrt, SearchInfo)
 	r.HandleFunc("/{pagesize:[A-Z][0-9]+}", srch).Methods(http.MethodGet)
 	r.HandleFunc("/{pagesize:[A-Z][0-9]+}/{hash:[a-zA-Z0-9]+={0,2}}", srch).Methods(http.MethodGet)
 
-	create := kong.ResourceMiddleware(http.DefaultClient, "entity.info.search", scrt, securityUrl, "", CreateInfo)
+	create := ins.Middleware("entity.info.search", scrt, CreateInfo)
 	r.HandleFunc("/", create).Methods(http.MethodPost)
 
-	r.HandleFunc("/register", kong.ResourceMiddleware(http.DefaultClient, "entity.info.register", scrt, securityUrl, "", RegisterPOST)).Methods(http.MethodPost)
+	r.HandleFunc("/register", ins.Middleware("entity.info.register", scrt, RegisterPOST)).Methods(http.MethodPost)
 
 	lst, err := kong.Whitelist(http.DefaultClient, securityUrl, "entity.info.view", scrt)
 

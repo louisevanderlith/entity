@@ -1,9 +1,11 @@
 package core
 
-import "github.com/louisevanderlith/husk"
+import (
+	"github.com/louisevanderlith/husk/hsk"
+)
 
 type entityMap func(result interface{}, obj Entity) error
 
-func (m entityMap) Calculate(result interface{}, obj husk.Dataer) error {
-	return m(result, obj.(Entity))
+func (m entityMap) Calculate(result interface{}, obj hsk.Record) error {
+	return m(result, obj.Data().(Entity))
 }

@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/louisevanderlith/husk"
+	"github.com/louisevanderlith/husk/validation"
 	"github.com/louisevanderlith/kong/prime"
 )
 
@@ -14,21 +14,5 @@ type Entity struct {
 }
 
 func (e Entity) Valid() error {
-	return husk.ValidateStruct(&e)
-}
-
-func (e Entity) Create() (husk.Recorder, error) {
-	rec, err := ctx.Entities.Create(e)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.Entities.Save()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return rec, nil
+	return validation.Struct(e)
 }

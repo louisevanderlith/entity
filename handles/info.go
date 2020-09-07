@@ -3,11 +3,11 @@ package handles
 import (
 	"github.com/louisevanderlith/droxolite/drx"
 	"github.com/louisevanderlith/droxolite/mix"
+	"github.com/louisevanderlith/husk/keys"
 	"log"
 	"net/http"
 
 	"github.com/louisevanderlith/entity/core"
-	"github.com/louisevanderlith/husk"
 )
 
 func GetInfo(w http.ResponseWriter, r *http.Request) {
@@ -50,11 +50,11 @@ func SearchInfo(w http.ResponseWriter, r *http.Request) {
 
 // @Title GetEntity
 // @Description Gets the requested Entity
-// @Param	key			path	husk.Key 	true		"Key of the entity you require"
+// @Param	key			path	hsk.Key 	true		"Key of the entity you require"
 // @Success 200 {core.Entity} core.Entity
 // @router /:key [get]
 func ViewInfo(w http.ResponseWriter, r *http.Request) {
-	key, err := husk.ParseKey(drx.FindParam(r, "key"))
+	key, err := keys.ParseKey(drx.FindParam(r, "key"))
 
 	if err != nil {
 		log.Println("Parse Key Error", err)
@@ -93,7 +93,8 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rec, err := entry.Create()
+	ctx := core.Context()
+	_, err = ctx.CreateEntity(entry)
 
 	if err != nil {
 		log.Println("Create Error", err)
@@ -101,7 +102,7 @@ func CreateInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = mix.Write(w, mix.JSON(rec.Data()))
+	err = mix.Write(w, mix.JSON("CREATED"))
 
 	if err != nil {
 		log.Println("Serve Error", err)

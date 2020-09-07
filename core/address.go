@@ -1,6 +1,8 @@
 package core
 
-import "github.com/louisevanderlith/husk"
+import (
+	"github.com/louisevanderlith/husk/validation"
+)
 
 type Address struct {
 	StreetNo    int
@@ -16,5 +18,5 @@ type Address struct {
 }
 
 func (a Address) Valid() error {
-	return husk.ValidateStruct(a)
+	return validation.Struct(a)
 }

@@ -1,25 +1,40 @@
 package core
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/louisevanderlith/husk"
+	"github.com/louisevanderlith/husk/collections"
+	"github.com/louisevanderlith/husk/hsk"
+	"github.com/louisevanderlith/husk/keys"
+	"github.com/louisevanderlith/husk/op"
+	"github.com/louisevanderlith/husk/records"
 	"github.com/louisevanderlith/kong/prime"
 	"github.com/louisevanderlith/kong/stores"
+	"golang.org/x/crypto/bcrypt"
 	"log"
+	"os"
+	"reflect"
 )
 
 type EntityContext interface {
 	stores.UserStore
-	GetEntities(page, pageSize int) (husk.Collection, error)
-	GetEntity(k husk.Key) (husk.Recorder, error)
+	CreateEntity(obj Entity) (hsk.Key, error)
+	GetEntities(page, pageSize int) (records.Page, error)
+	GetEntity(k hsk.Key) (hsk.Record, error)
 	Register(obj Registration) error
 	RequestReset(email, host string) (string, error)
+	ResetPassword(forgotKey hsk.Key, password string) error
 }
 
 type context struct {
-	Entities  husk.Tabler
-	Forgotten husk.Tabler
+	Entities  husk.Table
+	Forgotten husk.Table
+}
+
+func (c context) CreateEntity(obj Entity) (hsk.Key, error) {
+	return c.Entities.Create(obj)
 }
 
 var ctx context
@@ -36,7 +51,13 @@ func CreateContext() {
 }
 
 func seed() {
-	err := ctx.Entities.Seed("db/entities.seed.json")
+	entities, err := entitySeeds()
+
+	if err != nil {
+		panic(err)
+	}
+
+	err = ctx.Entities.Seed(entities)
 
 	if err != nil {
 		panic(err)
@@ -49,21 +70,39 @@ func seed() {
 	}
 }
 
+func entitySeeds() (collections.Enumerable, error) {
+	f, err := os.Open("db/entities.seed.json")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var items []Entity
+	dec := json.NewDecoder(f)
+	err = dec.Decode(&items)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return collections.ReadOnlyList(reflect.ValueOf(items)), nil
+}
+
 func Shutdown() {
 	ctx.Entities.Save()
 }
 
-func (c context) GetEntities(page, pageSize int) (husk.Collection, error) {
-	return c.Entities.Find(page, pageSize, husk.Everything())
+func (c context) GetEntities(page, pageSize int) (records.Page, error) {
+	return c.Entities.Find(page, pageSize, op.Everything())
 }
 
-func (c context) GetEntity(k husk.Key) (husk.Recorder, error) {
+func (c context) GetEntity(k hsk.Key) (hsk.Record, error) {
 	return c.Entities.FindByKey(k)
 }
 
 //GetUser returns the User by ID
 func (c context) GetUser(id string) prime.Userer {
-	k, err := husk.ParseKey(id)
+	k, err := keys.ParseKey(id)
 
 	if err != nil {
 		log.Println("GetUser Parse Error", err)
@@ -97,7 +136,7 @@ func (c context) GetUserByName(username string) (string, prime.Userer) {
 
 func (c context) GetUsers(page, size int) []SafeUser {
 	var result []SafeUser
-	users, err := c.Entities.Find(page, size, husk.Everything())
+	users, err := c.Entities.Find(page, size, op.Everything())
 
 	if err != nil {
 		log.Println(err)
@@ -107,10 +146,11 @@ func (c context) GetUsers(page, size int) []SafeUser {
 	itor := users.GetEnumerator()
 
 	for itor.MoveNext() {
-		currEntity := itor.Current().Data().(Entity)
+		rec := itor.Current().(hsk.Record)
+		currEntity := rec.Data().(Entity)
 		currUser := currEntity.User
 
-		sfeUser := createSafeUser(itor.Current().GetKey(), currUser)
+		sfeUser := createSafeUser(rec.GetKey(), currUser)
 		result = append(result, sfeUser)
 	}
 
@@ -131,22 +171,22 @@ func (c context) RequestReset(email, host string) (string, error) {
 		return "", errors.New("user not found")
 	}
 
-	k, _ := husk.ParseKey(id)
+	k, _ := keys.ParseKey(id)
 	forget := Forgot{
-		UserKey:  k,
-		Redeemed: false,
+		EntityKey: k,
+		Redeemed:  false,
 	}
 
-	forgt, err := ctx.Forgotten.Create(forget)
+	k, err := ctx.Forgotten.Create(forget)
 
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s/%s", host, forgt.GetKey()), nil
+	return fmt.Sprintf("%s/%s", host, k), nil
 }
 
-func (c context) ResetPassword(forgotKey husk.Key, password string) error {
+func (c context) ResetPassword(forgotKey hsk.Key, password string) error {
 	rec, err := ctx.Forgotten.FindByKey(forgotKey)
 
 	if err != nil {
@@ -163,17 +203,19 @@ func (c context) ResetPassword(forgotKey husk.Key, password string) error {
 		return errors.New("password length must be 6 or more characters")
 	}
 
-	_, err = ctx.Forgotten.FindByKey(forgetData.UserKey)
+	entity, err := ctx.Entities.FindByKey(forgetData.EntityKey)
 
 	if err != nil {
 		return err
 	}
 
-	//Change the Users password
-	//usrRec.SecurePassword(password)
+	pss, err := bcrypt.GenerateFromPassword([]byte(password), 11)
+	if err != nil {
+		return err
+	}
 
-	//Redeem the Forgot
-	forgetData.Redeemed = true
+	obj := entity.Data().(Entity)
+	obj.User.Password = string(pss)
 
 	err = ctx.Entities.Save()
 
@@ -181,5 +223,8 @@ func (c context) ResetPassword(forgotKey husk.Key, password string) error {
 		return err
 	}
 
-	return ctx.Forgotten.Save()
+	//Redeem the Forgot
+	forgetData.Redeemed = true
+
+	return ctx.Forgotten.Update(forgotKey, forgetData)
 }

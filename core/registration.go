@@ -2,7 +2,7 @@ package core
 
 import (
 	"errors"
-	"github.com/louisevanderlith/husk"
+	"github.com/louisevanderlith/husk/hsk"
 	"github.com/louisevanderlith/kong/prime"
 )
 
@@ -14,7 +14,7 @@ type Registration struct {
 	ProfileClient  string
 }
 
-func Register(r Registration) (husk.Recorder, error) {
+func Register(r Registration) (hsk.Key, error) {
 	if r.Password != r.PasswordRepeat {
 		return nil, errors.New("passwords do not match")
 	}
@@ -35,17 +35,5 @@ func Register(r Registration) (husk.Recorder, error) {
 	//Should provide only basic Resources, the rest will be unlocked later
 	user := prime.NewUser(r.Name, r.Email, r.Password, false, contc, nil)
 
-	rec, err := ctx.Entities.Create(user.(prime.User))
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = ctx.Entities.Save()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return rec, nil
+	return ctx.Entities.Create(user.(prime.User))
 }

@@ -116,7 +116,7 @@ func (c context) GetUser(id string) prime.Userer {
 		return nil
 	}
 
-	data := entity.Data().(Entity)
+	data := entity.GetValue().(Entity)
 	return data.User
 }
 
@@ -129,7 +129,7 @@ func (c context) GetUserByName(username string) (string, prime.Userer) {
 		return "", nil
 	}
 
-	data := entity.Data().(Entity)
+	data := entity.GetValue().(Entity)
 
 	return entity.GetKey().String(), data.User
 }
@@ -147,7 +147,7 @@ func (c context) GetUsers(page, size int) []SafeUser {
 
 	for itor.MoveNext() {
 		rec := itor.Current().(hsk.Record)
-		currEntity := rec.Data().(Entity)
+		currEntity := rec.GetValue().(Entity)
 		currUser := currEntity.User
 
 		sfeUser := createSafeUser(rec.GetKey(), currUser)
@@ -193,7 +193,7 @@ func (c context) ResetPassword(forgotKey hsk.Key, password string) error {
 		return err
 	}
 
-	forgetData := rec.Data().(Forgot)
+	forgetData := rec.GetValue().(Forgot)
 
 	if forgetData.Redeemed {
 		return errors.New("already redeemed")
@@ -214,7 +214,7 @@ func (c context) ResetPassword(forgotKey hsk.Key, password string) error {
 		return err
 	}
 
-	obj := entity.Data().(Entity)
+	obj := entity.GetValue().(Entity)
 	obj.User.Password = string(pss)
 
 	err = ctx.Entities.Save()

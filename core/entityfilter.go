@@ -7,7 +7,7 @@ import (
 type entityFilter func(obj Entity) bool
 
 func (f entityFilter) Filter(obj hsk.Record) bool {
-	return f(obj.Data().(Entity))
+	return f(obj.GetValue().(Entity))
 }
 
 //Email filter will filter by email and verification status

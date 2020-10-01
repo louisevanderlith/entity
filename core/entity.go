@@ -9,7 +9,7 @@ type Entity struct {
 	Name           string `hsk:"size(30)"`
 	ProfileKey     string
 	User           prime.User
-	Identification string    `hsk:"size(30)"` //This can be a Company Registration, RSA ID, Passport or another interal identifier
+	Identification string    `hsk:"size(30)"` //This can be a Company Registration, RSA ID, Passport or another internal identifier
 	Addresses      []Address `hsk:"null"`
 }
 

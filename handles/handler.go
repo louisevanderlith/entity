@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/louisevanderlith/entity/core"
 	"github.com/louisevanderlith/kong"
+	"github.com/louisevanderlith/kong/middle"
 	"github.com/rs/cors"
 	"net/http"
 )
@@ -14,7 +15,7 @@ func SetupRoutes(scrt, securityUrl string) http.Handler {
 	Manager = kong.NewManager(core.Context())
 
 	r := mux.NewRouter()
-	ins := kong.NewResourceInspector(http.DefaultClient, securityUrl, "")
+	ins := middle.NewResourceInspector(http.DefaultClient, securityUrl, "")
 	r.HandleFunc("/login", ins.Middleware("entity.login.apply", scrt, LoginPOST)).Methods(http.MethodPost)
 	r.HandleFunc("/consent", ins.Middleware("entity.consent.apply", scrt, ConsentPOST)).Methods(http.MethodPost)
 
@@ -33,7 +34,7 @@ func SetupRoutes(scrt, securityUrl string) http.Handler {
 
 	r.HandleFunc("/register", ins.Middleware("entity.info.register", scrt, RegisterPOST)).Methods(http.MethodPost)
 
-	lst, err := kong.Whitelist(http.DefaultClient, securityUrl, "entity.info.view", scrt)
+	lst, err := middle.Whitelist(http.DefaultClient, securityUrl, "entity.info.view", scrt)
 
 	if err != nil {
 		panic(err)

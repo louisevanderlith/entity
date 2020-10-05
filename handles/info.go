@@ -10,6 +10,30 @@ import (
 	"github.com/louisevanderlith/entity/core"
 )
 
+func GetInsight(w http.ResponseWriter, r *http.Request) {
+	idn := drx.GetIdentity(r)
+
+	if !idn.HasUser() {
+		log.Println("No User for Insight")
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	ut, err := Manager.Insight(idn.GetUserToken())
+
+	if err != nil {
+		log.Println("Insight Error", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	err = mix.Write(w, mix.JSON(ut))
+
+	if err != nil {
+		log.Println("Serve Error", err)
+	}
+}
+
 func GetInfo(w http.ResponseWriter, r *http.Request) {
 	results, err := core.Context().GetEntities(1, 10)
 

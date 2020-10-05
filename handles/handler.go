@@ -18,6 +18,7 @@ func SetupRoutes(scrt, securityUrl string) http.Handler {
 	ins := middle.NewResourceInspector(http.DefaultClient, securityUrl, "")
 	r.HandleFunc("/login", ins.Middleware("entity.login.apply", scrt, LoginPOST)).Methods(http.MethodPost)
 	r.HandleFunc("/consent", ins.Middleware("entity.consent.apply", scrt, ConsentPOST)).Methods(http.MethodPost)
+	r.HandleFunc("/insight", ins.Middleware("entity.info.view", scrt, GetInsight)).Methods(http.MethodGet)
 
 	get := ins.Middleware("entity.info.search", scrt, GetInfo)
 	r.HandleFunc("/", get).Methods(http.MethodGet)

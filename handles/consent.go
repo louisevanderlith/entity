@@ -1,15 +1,16 @@
 package handles
 
 import (
-	"encoding/json"
 	"github.com/louisevanderlith/droxolite/drx"
+	"github.com/louisevanderlith/droxolite/mix"
 	"github.com/louisevanderlith/kong/prime"
 	"log"
 	"net/http"
 )
 
 func ConsentPOST(w http.ResponseWriter, r *http.Request) {
-	obj := prime.QueryRequest{}
+	claims := make(map[string]bool)
+	obj := prime.QueryRequest{Claims: &claims}
 	err := drx.JSONBody(r, &obj)
 
 	if err != nil {
@@ -18,7 +19,7 @@ func ConsentPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ut, err := Manager.Consent(obj.Token, obj.Claims.(map[string]bool))
+	ut, err := Manager.Consent(obj.Token, claims)
 
 	if err != nil {
 		log.Println("Consent Error", err)
@@ -34,15 +35,7 @@ func ConsentPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bits, err := json.Marshal(enc)
-
-	if err != nil {
-		log.Println("Marshal Error", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	_, err = w.Write(bits)
+	err = mix.Write(w, mix.JSON(enc))
 
 	if err != nil {
 		log.Println("Serve Error", err)

@@ -1,5 +1,5 @@
 name: mango_entity
-version: 1.0.1
+version: 1.0.4
 description: Wrapper for Entity API
 repository: https://github.com/louisevanderlith/entity
 homepage: https://github.com/louisevanderlith/entity
@@ -7,3 +7,4 @@ environment:
   sdk: '>=2.0.0 < 3.0.0'
 dependencies:
   mango_ui: '^1.0.3'
+  mango_secure: '^1.0.8'

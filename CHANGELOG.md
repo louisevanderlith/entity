@@ -12,8 +12,6 @@
 
 * Added Entity Create and Update, and required Models
 
-
-
 # 1.0.1
 
 * Added Consent API call
